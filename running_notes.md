@@ -56,3 +56,34 @@
 - Load single PDF using PyPDFLoader
 - Then load all PDFs using DirectoryLoader with lazy_load
 - Then move to chunking with RecursiveCharacterTextSplitter
+
+## 11 June 2026
+
+### What I did
+- Started 02_langchain_pipeline.ipynb
+- Loaded single PDF using PyPDFLoader
+- Loaded all 6 PDFs using DirectoryLoader with lazy_load and multithreading
+- Applied basic text cleaning to all documents
+- Understood LangChain Document object structure — page_content and metadata
+
+### What I learned
+- PyPDFLoader loads one PDF, DirectoryLoader loads entire folders
+- Each loaded page is a LangChain Document object with page_content and metadata
+- lazy_load handles memory efficiently — one document at a time
+- use_multithreading speeds up loading by processing multiple PDFs in parallel
+- defaultdict automatically initialises new keys with a default value
+- split('\\')[-1] extracts just the filename from a full file path
+- Cleaning is optional for good quality digital PDFs like IPCC documents
+
+### Key decisions
+- Skipping cleaning step for now — IPCC PDFs are clean enough
+- Will revisit cleaning only if retrieval quality suffers during evaluation
+
+### Stats confirmed
+- Total pages loaded: 420 across 6 documents
+- WG1 SPM: 32, WG1 TS: 112, WG2 SPM: 34, WG2 TS: 84, WG3 SPM: 56, WG3 TS: 102
+
+### Next session
+- Chunking using RecursiveCharacterTextSplitter
+- Test three chunk sizes: 200, 500, 800 words
+- Understand what chunks look like before moving to embedding
