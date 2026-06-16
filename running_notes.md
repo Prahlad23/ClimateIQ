@@ -87,3 +87,32 @@
 - Chunking using RecursiveCharacterTextSplitter
 - Test three chunk sizes: 200, 500, 800 words
 - Understand what chunks look like before moving to embedding
+
+## 16 June 2026
+
+### What I did
+- Created three ChromaDB collections for chunk sizes 1000, 2500, 4000
+- Embedded all 3918 chunks using all-MiniLM-L6-v2
+- Connected Groq LLM (llama-3.1-8b-instant) to retriever
+- Built complete end to end RAG pipeline using modern LangChain LCEL syntax
+- Tested pipeline with multiple questions
+
+### Key findings
+- Pipeline works correctly for specific factual questions
+- "What is the current global temperature rise?" — answered correctly, cited A.1.2 WG1 SPM
+- "What will happen to sea levels by 2100?" — answered correctly
+- "What are the main causes of climate change?" — FAILED (retrieval miss)
+- Rephrasing to "human influence greenhouse gas emissions" — succeeded immediately
+- RESEARCH FINDING: Dense retrieval fails when user vocabulary differs from document vocabulary
+- This confirms why hybrid retrieval with BM25 is needed
+
+### What I learned
+- RetrievalQA is deprecated in modern LangChain — use LCEL chain instead
+- Modern RAG chain uses pipe operator | to connect components
+- Retrieval failures are content problems not system problems
+- Same information retrieved successfully with different query phrasing
+
+### Next session
+- Add source document display to answers
+- Build BM25 retriever
+- Compare dense vs BM25 on same failed question
