@@ -116,3 +116,89 @@
 - Add source document display to answers
 - Build BM25 retriever
 - Compare dense vs BM25 on same failed question
+
+## 16-18 June 2026 — Retrieval Investigation and Findings
+
+### The Query We Investigated
+"What are the main causes of climate change?"
+
+### What We Confirmed
+The correct answer exists in the database — WG1 SPM Page 3:
+"Observed increases in well-mixed greenhouse gas (GHG) concentrations 
+since around 1750 are unequivocally caused by human activities."
+
+This chunk is clean, properly stored, and retrievable with technical vocabulary.
+
+### What We Tried and Results
+
+1. DENSE RETRIEVAL — FAILED
+   Retrieved chunks about displacement, coral bleaching, heat mortality.
+   Reason: Semantic vectors for "main causes of climate change" and 
+   "unequivocally caused by human activities" are not close enough 
+   because surface vocabulary is too different despite similar meaning.
+
+2. BM25 RETRIEVAL — FAILED
+   Retrieved chunks about mitigation pathways and model methodologies.
+   Reason: Word "causes" matched to "caused" but BM25 was confused by 
+   high frequency of climate-related terms across all documents. Term 
+   frequency noise overwhelmed the keyword signal.
+
+3. HYBRID RETRIEVAL (EnsembleRetriever) — FAILED
+   Retrieved 5 chunks, partially relevant but still missed A.1.1.
+   Reason: Both underlying methods failed so combining them could not 
+   overcome the fundamental vocabulary gap. Result 2 contained 
+   "Human-induced climate change" which was partially relevant.
+
+4. MULTI QUERY RETRIEVER — FAILED
+   Retrieved 10 chunks across multiple query variations, still missed A.1.1.
+   Reason: LLM generated alternative phrasings but none were technical 
+   enough to bridge the vocabulary gap to the exact chunk.
+
+5. DIRECT TECHNICAL VOCABULARY SEARCH — SUCCESS
+   Query: "greenhouse gas concentrations caused human activities"
+   Retrieved A.1.1 as Result 1 immediately.
+   Reason: Query vocabulary matched document vocabulary closely enough 
+   for semantic similarity to work correctly.
+
+### Root Cause Analysis
+This is a vocabulary mismatch problem — a documented and known 
+limitation of RAG systems on scientific literature. Confirmed by 
+published research (KohakuRAG 2025, RAG taxonomy surveys 2024).
+
+The IPCC uses highly specialised technical vocabulary. Non-expert users 
+ask questions in everyday language. The semantic gap between these two 
+registers is too large for any of the four retrieval methods to bridge 
+without additional preprocessing.
+
+### What Helped Partially
+- Header cleaning (removing Box 9.1, Figure SPM.1, A.1.1 labels) 
+  improved chunk quality. Dense retrieval results became more relevant 
+  after cleaning even if A.1.1 was still not retrieved.
+- Result quality improved from completely irrelevant to partially 
+  relevant after cleaning.
+
+### LangChain Import Issues Encountered
+- EnsembleRetriever not in langchain.retrievers or langchain_community
+- Root cause: LangChain 1.0 (November 2025) moved legacy retrievers 
+  to langchain_classic package
+- Fix: pip install langchain-classic, then 
+  from langchain_classic.retrievers import EnsembleRetriever
+- MultiQueryRetriever found in langchain_community after searching
+- Rule going forward: langchain_core for abstractions, 
+  langchain_community for loaders/BM25, langchain_classic for legacy 
+  retrievers, langchain_groq/chroma/huggingface for providers
+
+### Research Implication
+All four retrieval strategies fail on conceptual natural language 
+queries over highly technical scientific literature. This is the 
+central finding of the retrieval comparison phase and will form the 
+core of the research report's analysis section.
+
+Query transformation or domain-specific query expansion is needed 
+as an additional layer — this is the next step to implement.
+
+### Next Steps
+- Implement simple query expansion using LLM before retrieval
+- Build complete RAG chain connecting all retrieval methods
+- Start benchmark dataset construction
+- Run formal experiments across all configurations
