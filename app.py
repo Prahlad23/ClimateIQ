@@ -12,7 +12,13 @@ from dotenv import load_dotenv
 import os
 import re
 
-load_dotenv()
+import streamlit as st
+try:
+    groq_key = st.secrets["GROQ_API_KEY"]
+except:
+    from dotenv import load_dotenv
+    load_dotenv()
+    groq_key = os.getenv("GROQ_API_KEY")
 
 # Page config
 st.set_page_config(
@@ -36,7 +42,7 @@ def load_resources():
         model_kwargs={"device": "cpu"}
     )
     
-    chroma_path = r"C:\Users\Asus\Documents\Oulu Research Intern\ClimateIQ\Data\chroma_db"
+    chroma_path = os.path.join(os.path.dirname(__file__), "Data", "chroma_db")
     
     # Load vectorstore
     vectorstore = Chroma(
@@ -47,7 +53,7 @@ def load_resources():
     
     # Load documents for BM25
     loader = DirectoryLoader(
-        r"C:\Users\Asus\Documents\Oulu Research Intern\ClimateIQ\Data\raw",
+        os.path.join(os.path.dirname(__file__), "Data", "raw"),
         glob="*.pdf",
         loader_cls=PyPDFLoader,
         show_progress=False
@@ -87,7 +93,7 @@ def load_resources():
     # Load LLM
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
-        api_key=os.getenv("GROQ_API_KEY"),
+        api_key=groq_key,
         temperature=0
     )
     
