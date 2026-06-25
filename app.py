@@ -14,9 +14,12 @@ import os
 import re
 
 import streamlit as st
-try:
+import os
+
+# Get API key
+if "GROQ_API_KEY" in st.secrets:
     groq_key = st.secrets["GROQ_API_KEY"]
-except:
+else:
     from dotenv import load_dotenv
     load_dotenv()
     groq_key = os.getenv("GROQ_API_KEY")
