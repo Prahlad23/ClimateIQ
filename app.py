@@ -1,3 +1,4 @@
+import pickle
 import streamlit as st
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
@@ -51,41 +52,11 @@ def load_resources():
         persist_directory=chroma_path
     )
     
-    # Load documents for BM25
-    loader = DirectoryLoader(
-        os.path.join(os.path.dirname(__file__), "Data", "raw"),
-        glob="*.pdf",
-        loader_cls=PyPDFLoader,
-        show_progress=False
-    )
-    all_documents = list(loader.lazy_load())
-    
-    # Clean documents
-    def clean_document(text):
-        if text is None:
-            return ""
-        text = re.sub(r'Figure\s+[A-Z]*\s*\d+\.\d+', '', text)
-        text = re.sub(r'Box\s+[A-Z]*\s*\d+\.\d+', '', text)
-        text = re.sub(r'\b[A-Z]{1,2}\.\d+\.\d+\b', '', text)
-        text = re.sub(r'\{[^}]+\}', '', text)
-        text = re.sub(r'^\d+$', '', text, flags=re.MULTILINE)
-        text = re.sub(r'^[-_]+$', '', text, flags=re.MULTILINE)
-        text = re.sub(r' +', ' ', text)
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        return text.strip()
-    
-    for doc in all_documents:
-        doc.page_content = clean_document(doc.page_content)
-    
-    # Chunk for BM25
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=2500,
-        chunk_overlap=250,
-        length_function=len,
-        separators=["\n\n", "\n", ".", " ", ""]
-    )
-    chunks = splitter.split_documents(all_documents)
-    chunks = [c for c in chunks if len(c.page_content) >= 100]
+    # Load pre-saved chunks for BM25
+    chunks_path = os.path.join(os.path.dirname(__file__), "chunks.pkl")
+    with open(chunks_path, "rb") as f:
+        all_chunk_sets = pickle.load(f)
+    chunks = all_chunk_sets[2500]
     
     # Build BM25 index
     bm25_retriever = BM25Retriever.from_documents(chunks, k=3)
