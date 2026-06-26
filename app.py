@@ -1,5 +1,6 @@
 import pickle
 import streamlit as st
+import os
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.retrievers import BM25Retriever
@@ -7,20 +8,12 @@ from langchain_classic.retrievers import EnsembleRetriever
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 from dotenv import load_dotenv
-import os
-import re
-
-import streamlit as st
-import os
 
 # Get API key
 if "GROQ_API_KEY" in st.secrets:
     groq_key = st.secrets["GROQ_API_KEY"]
 else:
-    from dotenv import load_dotenv
     load_dotenv()
     groq_key = os.getenv("GROQ_API_KEY")
 
@@ -33,10 +26,10 @@ st.set_page_config(
 
 # Title
 st.title("🌍 ClimateIQ")
-st.subheader("Ask anything about climate change — powered by IPCC AR6 🌱")
+st.subheader("Ask anything about climate change — powered by IPCC AR6")
 st.markdown("---")
 
-# ADD FROM HERE
+# App description and guide
 st.markdown("""
 ### What is ClimateIQ?
 ClimateIQ is an AI-powered climate science assistant built on **IPCC AR6** — the most authoritative 
@@ -91,17 +84,11 @@ with col2:
 """)
 
 st.markdown("---")
-# ADD TILL HERE
-
-# Cache expensive resources so they load only once
-@st.cache_resource
-def load_resources():
 
 # Cache expensive resources so they load only once
 @st.cache_resource
 def load_resources():
     
-    # Load embedding model
     embeddings = HuggingFaceEmbeddings(
         model_name="all-MiniLM-L6-v2",
         model_kwargs={"device": "cpu"}
@@ -109,23 +96,19 @@ def load_resources():
     
     chroma_path = os.path.join(os.path.dirname(__file__), "Data", "chroma_db")
     
-    # Load vectorstore
     vectorstore = Chroma(
         collection_name="climate_chunks_2500",
         embedding_function=embeddings,
         persist_directory=chroma_path
     )
     
-    # Load pre-saved chunks for BM25
     chunks_path = os.path.join(os.path.dirname(__file__), "chunks.pkl")
     with open(chunks_path, "rb") as f:
         all_chunk_sets = pickle.load(f)
     chunks = all_chunk_sets[2500]
     
-    # Build BM25 index
     bm25_retriever = BM25Retriever.from_documents(chunks, k=3)
     
-    # Load LLM
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
         api_key=groq_key,
@@ -219,11 +202,9 @@ if query:
     with st.spinner("Searching climate science literature..."):
         answer, retrieved_docs, search_query = run_pipeline(query, retriever_type)
     
-    # Show answer
     st.markdown("### Answer")
     st.markdown(answer)
     
-    # Show sources
     st.markdown("### Sources")
     for i, doc in enumerate(retrieved_docs):
         source = doc.metadata.get("source", "").split("\\")[-1]
@@ -231,7 +212,6 @@ if query:
         with st.expander(f"Source {i+1} — {source}, Page {page}"):
             st.markdown(doc.page_content)
     
-    # Show expanded query if used
     if retriever_type == "Dense + Query Expansion" and search_query != query:
         with st.expander("Query after expansion"):
             st.markdown(f"*{search_query}*")

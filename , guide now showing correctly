@@ -1,0 +1,3 @@
+[33m8cd1f7a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m force redeploy with guide content
+[33me458577[m add user guide and example questions to frontend
+[33m248ba11[m fix Groq API key reading from Streamlit secrets
