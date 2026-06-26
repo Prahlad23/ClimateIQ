@@ -26,7 +26,7 @@ st.set_page_config(
 
 # Title
 st.title("🌍 ClimateIQ")
-st.subheader("Ask anything about climate change — powered by IPCC AR6")
+st.subheader("Ask anything you want about climate change — powered by IPCC AR6")
 st.markdown("---")
 
 # App description and guide
