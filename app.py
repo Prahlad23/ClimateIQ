@@ -36,6 +36,67 @@ st.title("🌍 ClimateIQ")
 st.subheader("Ask anything about climate change — powered by IPCC AR6")
 st.markdown("---")
 
+# ADD FROM HERE
+st.markdown("""
+### What is ClimateIQ?
+ClimateIQ is an AI-powered climate science assistant built on **IPCC AR6** — the most authoritative 
+climate science assessment in the world. It retrieves answers directly from scientific documents 
+and cites its sources, so every answer is grounded and verifiable.
+""")
+
+st.markdown("### How to use")
+st.markdown("""
+Type any question about climate change in the box below and press Enter. 
+The system will search through IPCC AR6 reports and generate a cited answer.
+You can ask in simple everyday language or in technical scientific terms.
+""")
+
+st.markdown("### Example questions to get you started")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**🌡️ Temperature and Science**")
+    st.markdown("""
+- What is the current global temperature rise?
+- What are the main causes of climate change?
+- What are climate tipping points?
+- How has sea level changed since 1900?
+- What is the difference between 1.5°C and 2°C warming?
+""")
+    
+    st.markdown("**🌊 Oceans and Ice**")
+    st.markdown("""
+- How much will sea levels rise by 2100?
+- What is happening to Arctic sea ice?
+- What is ocean acidification?
+- How are glaciers changing globally?
+""")
+
+with col2:
+    st.markdown("**🌿 Impacts and Adaptation**")
+    st.markdown("""
+- How does climate change affect food security?
+- What are the health impacts of climate change?
+- How will climate change affect cities?
+- What regions are most vulnerable to climate change?
+""")
+    
+    st.markdown("**⚡ Solutions and Policy**")
+    st.markdown("""
+- What is the difference between mitigation and adaptation?
+- What emission reductions are needed by 2030?
+- What role does renewable energy play in mitigation?
+- Are current climate pledges sufficient?
+""")
+
+st.markdown("---")
+# ADD TILL HERE
+
+# Cache expensive resources so they load only once
+@st.cache_resource
+def load_resources():
+
 # Cache expensive resources so they load only once
 @st.cache_resource
 def load_resources():
