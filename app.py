@@ -97,15 +97,14 @@ def load_resources():
     chroma_path = os.path.join(os.path.dirname(__file__), "Data", "chroma_db")
     
     vectorstore = Chroma(
-        collection_name="climate_chunks_2500",
+        collection_name="climate_full_2500",
         embedding_function=embeddings,
         persist_directory=chroma_path
     )
     
     chunks_path = os.path.join(os.path.dirname(__file__), "chunks.pkl")
     with open(chunks_path, "rb") as f:
-        all_chunk_sets = pickle.load(f)
-    chunks = all_chunk_sets[2500]
+        chunks = pickle.load(f)
     
     bm25_retriever = BM25Retriever.from_documents(chunks, k=3)
     
