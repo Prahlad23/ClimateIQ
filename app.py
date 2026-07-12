@@ -95,16 +95,27 @@ def load_resources():
     )
     
     chroma_path = os.path.join(os.path.dirname(__file__), "Data", "chroma_db")
-    
-    vectorstore = Chroma(
-        collection_name="climate_full_2500",
-        embedding_function=embeddings,
-        persist_directory=chroma_path
-    )
-    
+
+    # Load chunks
     chunks_path = os.path.join(os.path.dirname(__file__), "chunks.pkl")
     with open(chunks_path, "rb") as f:
         chunks = pickle.load(f)
+
+    # Build ChromaDB if it does not exist
+    if not os.path.exists(chroma_path) or not os.listdir(chroma_path):
+        st.info("Building search index for first time... this takes a few minutes.")
+        vectorstore = Chroma.from_documents(
+            documents=chunks,
+            embedding=embeddings,
+            collection_name="climate_full_2500",
+            persist_directory=chroma_path
+        )
+    else:
+        vectorstore = Chroma(
+            collection_name="climate_full_2500",
+            embedding_function=embeddings,
+            persist_directory=chroma_path
+        )
     
     bm25_retriever = BM25Retriever.from_documents(chunks, k=3)
     

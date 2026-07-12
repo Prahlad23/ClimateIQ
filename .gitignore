@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 Data/raw/
 .streamlit/secrets.toml
+Data/chroma_db/
